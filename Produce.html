@@ -12,6 +12,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <script src="/socket.io/socket.io.js"></script>
     <script src='//production-assets.codepen.io/assets/editor/live/console_runner-079c09a0e3b9ff743e39ee2d5637b9216b3545af0de366d4b9aad9dc87e26bfd.js'></script>
     <script src='//production-assets.codepen.io/assets/editor/live/events_runner-73716630c22bbc8cff4bd0f07b135f00a0bdc5d14629260c3ec49e5606f98fdd.js'></script><script src='//production-assets.codepen.io/assets/editor/live/css_live_reload_init-2c0dc5167d60a5af3ee189d570b1835129687ea2a61bee3513dee3a50c115a77.js'></script><meta charset='UTF-8'><meta name="robots" content="noindex"><link rel="shortcut icon" type="image/x-icon" href="//production-assets.codepen.io/assets/favicon/favicon-8ea04875e70c4b0bb41da869e81236e54394d63638a1ef12fa558a4a835f1164.ico" /><link rel="mask-icon" type="" href="//production-assets.codepen.io/assets/favicon/logo-pin-f2d2b6d2c61838f7e76325261b7195c27224080bc099486ddd6dccb469b8e8e6.svg" color="#111" /><link rel="canonical" href="https://codepen.io/emilcarlsson/pen/ZOQZaV?limit=all&page=74&q=contact+" />
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700,300' rel='stylesheet' type='text/css'>
@@ -193,7 +194,7 @@
           </div>
         </div>
         <div class="messages">
-          <ul>
+          <!-- <ul>
             <li class="sent">
               <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
               <p>How the hell am I supposed to get a jury to believe you when I am not even sure that I do?!</p>
@@ -226,7 +227,8 @@
               <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
               <p>Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
             </li>
-          </ul>
+          </ul> -->
+          <ul id="messages"></ul>
         </div>
         <div class="message-input">
           <div class="wrap">
@@ -237,64 +239,31 @@
         </div>
       </div>
     </div>
-    <script src='//production-assets.codepen.io/assets/common/stopExecutionOnTimeout-b2a7b3fe212eaa732349046d8416e00a9dec26eb7fd347590fbced3ab38af52e.js'></script><script src='https://code.jquery.com/jquery-2.2.4.min.js'></script>
-    <script >
-      $(".messages").animate({ scrollTop: $(document).height() }, "fast");
+    <script src='//production-assets.codepen.io/assets/common/stopExecutionOnTimeout-b2a7b3fe212eaa732349046d8416e00a9dec26eb7fd347590fbced3ab38af52e.js'></script>
+    <script src='https://code.jquery.com/jquery-2.2.4.min.js'></script>
+    <script src='/helper.js'></script>
+    <script src="/socket.js"></script>
+    <script>
+      var socket = io();
 
-      $("#profile-img").click(function() {
-        $("#status-options").toggleClass("active");
-      });
+      var messages = document.getElementById('messages');
+      var form = document.getElementById('form');
+      var input = document.getElementById('input');
 
-      $(".expand-button").click(function() {
-        $("#profile").toggleClass("expanded");
-        $("#contacts").toggleClass("expanded");
-      });
-
-      $("#status-options ul li").click(function() {
-        $("#profile-img").removeClass();
-        $("#status-online").removeClass("active");
-        $("#status-away").removeClass("active");
-        $("#status-busy").removeClass("active");
-        $("#status-offline").removeClass("active");
-        $(this).addClass("active");
-        
-        if($("#status-online").hasClass("active")) {
-          $("#profile-img").addClass("online");
-        } else if ($("#status-away").hasClass("active")) {
-          $("#profile-img").addClass("away");
-        } else if ($("#status-busy").hasClass("active")) {
-          $("#profile-img").addClass("busy");
-        } else if ($("#status-offline").hasClass("active")) {
-          $("#profile-img").addClass("offline");
-        } else {
-          $("#profile-img").removeClass();
-        };
-        
-        $("#status-options").removeClass("active");
-      });
-
-      function newMessage() {
-        message = $(".message-input input").val();
-        if($.trim(message) == '') {
-          return false;
-        }
-        $('<li class="sent"><img src="http://emilcarlsson.se/assets/mikeross.png" alt="" /><p>' + message + '</p></li>').appendTo($('.messages ul'));
-        $('.message-input input').val(null);
-        $('.contact.active .preview').html('<span>You: </span>' + message);
-        $(".messages").animate({ scrollTop: $(document).height() }, "fast");
-      };
-
-      $('.submit').click(function() {
-        newMessage();
-      });
-
-      $(window).on('keydown', function(e) {
-        if (e.which == 13) {
-          newMessage();
-          return false;
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (input.value) {
+          socket.emit('chat message', input.value);
+          input.value = '';
         }
       });
-    //# sourceURL=pen.js
+
+      socket.on('chat message', function(msg) {
+        var item = document.createElement('li');
+        item.textContent = msg;
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+      });
     </script>
-  </body>
+  </body> 
 </html>
